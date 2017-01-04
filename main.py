@@ -86,7 +86,7 @@ try:
             "JOIN RKPerson p ON (p.modelId = f.personId) WHERE ((p.name IS NOT NULL) AND (p.name != ''))"
 
         q = "SELECT p.name AS name, m.imagePath AS path FROM RKMaster m JOIN RKFace f ON (f.imageModelId = m.modelId) " \
-            "JOIN RKPerson p ON (p.modelId = f.personId) WHERE (p.name = 'Anel')"
+            "JOIN RKPerson p ON (p.modelId = f.personId) WHERE (p.name LIKE 'Ian M%')"
 
         cur.execute(q)
         while True:
@@ -101,26 +101,27 @@ try:
             metadata = pyexiv2.ImageMetadata(image)
             metadata.read()
 
-            newkeywords = person
+            newkeywords = [person]
 
             keyword_tag = 'Iptc.Application2.Keywords'
             if keyword_tag in metadata.iptc_keys:
                 tag = metadata[keyword_tag]
                 oldkeywords = tag.value
-                print "        Existing keywords:", oldkeywords
+                print "        Existing tags:", oldkeywords
                 if not newkeywords:
                     sys.exit(0)
                 for newkey in newkeywords:
-                    oldkeywords.append(newkey)
+                    if newkey not in oldkeywords:
+                      oldkeywords.append(newkey)
                 tag.value = oldkeywords
             else:
-                print "        No IPTC keywords set yet"
+                print "        No IPTC tags set yet"
                 if not newkeywords:
                     sys.exit(0)
                 metadata[keyword_tag] = pyexiv2.IptcTag(keyword_tag, newkeywords)
 
             tag = metadata[keyword_tag]
-            print "        New keywords:", tag.value
+            print "        New tags:", tag.value
 
             metadata.write()
 
